@@ -42,6 +42,19 @@
       border-radius: 10px;
     }
     pre { padding: 12px; overflow-x: auto; }
+    .btn {
+      display: inline-block;
+      padding: 6px 10px;
+      margin-left: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(79, 209, 197, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: rgba(140, 200, 255, 0.16); color: var(--accent-2); }
 
     .sidebar {
       width: 260px;
@@ -123,7 +136,10 @@
     </div>
     <div class="nav-section">
       <h4>Feed URL</h4>
-      <code>https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk</code>
+      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+        <code>https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk</code>
+        <a class="btn" href="https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk" target="_blank" rel="noopener">Open</a>
+      </div>
     </div>
   </aside>
 
@@ -157,7 +173,10 @@ opkg install openwrt-flowoffload-pbr-mitigation</pre>
             </ul>
           </div>
           <div>
-            <h3>Release assets</h3>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <pre style="margin:0;">https://a29pine.github.io/openwrt-flowoffload-pbr-misroute/ipk</pre>
+              <a class="btn" href="https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk" target="_blank" rel="noopener">Open</a>
+            </div>
             <ul>
               <li><a href="https://github.com/a29pine/openwrt-flowoffload-pbr-mac-misroute/releases/download/v0.1.0/openwrt-flowoffload-pbr-mac-misroute-v0.1.0.tar.gz">Tarball v0.1.0</a></li>
               <li><a href="https://github.com/a29pine/openwrt-flowoffload-pbr-mac-misroute/releases/download/v0.1.0/openwrt-flowoffload-pbr-mitigation_0.1.0_all.ipk">ipk (release)</a></li>
