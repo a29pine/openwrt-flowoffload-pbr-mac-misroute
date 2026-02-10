@@ -2,12 +2,175 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>openwrt-flowoffload-pbr feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenWrt Flow Offload + PBR Mitigation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #0c1116;
+      --panel: #111822;
+      --accent: #4fd1c5;
+      --accent-2: #8cc8ff;
+      --text: #e8eef5;
+      --muted: #9fb3c8;
+      --border: #1f2a3a;
+      --code: #0b1624;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(120% 120% at 20% 20%, #112135, #0b131c 50%, #090f15 70%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      padding: 56px 24px 32px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(79, 209, 197, 0.12), rgba(140, 200, 255, 0.16));
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { margin: 0 0 12px; font-size: 32px; letter-spacing: 0.5px; }
+    h2 { margin: 28px 0 12px; font-size: 22px; }
+    h3 { margin: 20px 0 8px; font-size: 18px; }
+    p { margin: 0 0 12px; color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-2); }
+    .layout { max-width: 1080px; margin: 0 auto; padding: 28px 20px 64px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    }
+    pre, code {
+      font-family: "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+      background: var(--code);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    pre { padding: 12px; overflow-x: auto; }
+    ul { margin: 0 0 12px 20px; color: var(--muted); }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(79, 209, 197, 0.16);
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      margin-right: 8px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  </style>
 </head>
 <body>
-  <h1>OpenWrt flow offload PBR mitigation feed</h1>
-  <p>Packages directory: <a href="ipk/">ipk/</a></p>
-  <p>Add this feed to /etc/opkg/customfeeds.conf:</p>
-  <pre>src/gz flowoffloadpbr https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk</pre>
+  <header>
+    <div class="pill">OpenWrt 24.10.x</div>
+    <div class="pill">Flow offload + PBR</div>
+    <div class="pill">Mitigation & Repro</div>
+    <h1>Flow Offload + PBR Wrong-MAC Mitigation</h1>
+    <p>Feeds, installs, and docs for the nftables guard that keeps policy-routed/NAT flows out of flow offload to prevent wrong-LAN-MAC delivery.</p>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <h2>Quick Install (opkg feed)</h2>
+      <p>Add the feed and install the mitigation package on your router.</p>
+      <pre>echo 'src/gz flowoffloadpbr https://a29pine.github.io/openwrt-flowoffload-pbr-mac-misroute/ipk' >> /etc/opkg/customfeeds.conf
+opkg update
+opkg install openwrt-flowoffload-pbr-mitigation</pre>
+      <p>The package drops <code>/etc/nftables.d/99-flowoffload-pbr.nft</code> and reloads firewall4 so the guard is active immediately.</p>
+      <p>Feed contents: <a href="ipk/">ipk/</a> (Packages, Packages.gz, ipk).</p>
+    </section>
+
+    <section class="card">
+      <h2>What This Fixes</h2>
+      <ul>
+        <li>OpenWrt 24.10.0 with flow offload + PBR: policy-routed NAT UDP flows can be delivered to the wrong LAN MAC (often the PBR next-hop/VPN MAC).</li>
+        <li>Root cause: flowtable keeps PBR/NAT flows; neighbor/route cache mismatch causes misdelivery.</li>
+        <li>Mitigation: skip flow offload when <code>meta mark != 0</code> (PBR) or <code>ct status { dnat, snat }</code> (NAT).</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Artifacts</h2>
+      <div class="grid">
+        <div>
+          <h3>Package</h3>
+          <ul>
+            <li><a href="ipk/openwrt-flowoffload-pbr-mitigation_0.1.0_all.ipk">openwrt-flowoffload-pbr-mitigation_0.1.0_all.ipk</a></li>
+            <li>Feed indexes: <a href="ipk/Packages">Packages</a>, <a href="ipk/Packages.gz">Packages.gz</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Release assets</h3>
+          <ul>
+            <li><a href="https://github.com/a29pine/openwrt-flowoffload-pbr-mac-misroute/releases/tag/v0.1.0">GitHub release v0.1.0</a></li>
+            <li>Tarball, ipk, checksums included in the release.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Usage on OpenWrt</h2>
+      <h3>Apply mitigation now</h3>
+      <pre>opkg install openwrt-flowoffload-pbr-mitigation</pre>
+      <h3>Rollback</h3>
+      <pre>opkg remove openwrt-flowoffload-pbr-mitigation</pre>
+      <p>The include is a conffile; removing the package also reloads firewall4 to drop it.</p>
+    </section>
+
+    <section class="card">
+      <h2>Reproduce + Validate (host)</h2>
+      <ul>
+        <li>Netns lab: <code>./reproducer/netns-lab.sh run</code> (Linux host, root). Toggle offload with <code>FLOW_OFFLOAD=1</code>, mitigation with <code>MITIGATION=0/1</code>.</li>
+        <li>Smoke test: <code>make smoke</code> (runs lab offload off/on, ensures MAC correctness).</li>
+        <li>Cleanup: <code>make clean</code> or <code>./reproducer/netns-lab.sh clean</code>.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Diagnostics (router)</h2>
+      <ul>
+        <li>Collector: <code>diagnostics/collect.sh</code> (run on router; gathers nft ruleset, flowtable, conntrack, tcpdump hints).</li>
+        <li>Key evidence for upstream: nft flowtable entries, tcpdump L2 headers showing wrong MAC, conntrack entries for affected flows.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Manual Commands (router)</h2>
+      <ul>
+        <li><code>nft list flowtable inet fw4 ftoffload</code> — confirm guards are keeping PBR/NAT flows out.</li>
+        <li><code>nft monitor trace</code> — trace packet path vs flowtable decisions.</li>
+        <li><code>ip -s neigh show</code> — watch neighbor churn.</li>
+        <li><code>tcpdump -nn -e -i br-lan udp port 53</code> — verify destination MAC on replies.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Versioning</h2>
+      <ul>
+        <li>Current: 0.1.0 (tag v0.1.0).</li>
+        <li>Package version matches the latest git tag; override with <code>VERSION=&lt;ver&gt; ./scripts/build-ipk.sh</code> if building locally.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Report Issues</h2>
+      <p>Open an issue on the GitHub repo with:</p>
+      <ul>
+        <li>nft ruleset + flowtable listing</li>
+        <li>tcpdump -e trace showing wrong destination MAC vs expected</li>
+        <li>conntrack entries for the affected flow</li>
+        <li>Router model, OpenWrt version, flow offload mode (sw/hw), PBR config</li>
+      </ul>
+      <p><a href="https://github.com/a29pine/openwrt-flowoffload-pbr-mac-misroute/issues">File an issue</a></p>
+    </section>
+  </main>
 </body>
 </html>
