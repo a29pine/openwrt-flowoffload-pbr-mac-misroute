@@ -1,0 +1,12 @@
+# Build / runtime artifacts
+reproducer/output/
+*.pcap
+*.log
+*.pid
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Editor/OS
+.DS_Store

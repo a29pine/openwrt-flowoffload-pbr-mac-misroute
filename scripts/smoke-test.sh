@@ -7,6 +7,8 @@ ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 LAB="${ROOT_DIR}/reproducer/netns-lab.sh"
 LOG_DIR="${ROOT_DIR}/reproducer/output"
 
+mkdir -p "${LOG_DIR}"
+
 run_case() {
   local name="$1"; shift
   echo "[smoke] running case: ${name}" >&2

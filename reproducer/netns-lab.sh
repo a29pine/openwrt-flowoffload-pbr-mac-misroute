@@ -154,7 +154,7 @@ install_nft_rules() {
 
   local mitigation_skip=""
   if [[ "${MITIGATION}" == "1" ]]; then
-    mitigation_skip="  meta mark != 0 return\n      ct status { dnat, snat } return"
+    mitigation_skip=$'    meta mark != 0 return\n    ct status { dnat, snat } return'
   fi
 
   local mark_rule=""
