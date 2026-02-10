@@ -48,6 +48,11 @@ When filing upstream bugs (OpenWrt firewall4, netfilter, or kernel), attach:
 - Apply mitigation via `mitigation/apply.sh`.
 - Re-run diagnostics after reproducing to confirm offload exclusion of marked/NAT flows.
 
+### OpenWrt package (ipk)
+- Build ipk on a Linux host: `./scripts/build-ipk.sh` (uses latest git tag for version; override with `VERSION=0.1.0`).
+- Install on the router: `scp dist/openwrt-flowoffload-pbr-mitigation_<ver>_all.ipk root@router:/tmp && ssh root@router opkg install /tmp/openwrt-flowoffload-pbr-mitigation_<ver>_all.ipk`.
+- Post-install automatically reloads firewall4 to pick up the include; removing the package reloads firewall to drop it.
+
 ### Making the mitigation persistent on OpenWrt
 - Copy [mitigation/firewall4-offload-mitigation.nft](mitigation/firewall4-offload-mitigation.nft) to `/etc/nftables.d/99-flowoffload-pbr.nft`.
 - Ensure firewall4 loads includes (default on 24.10.0) and restart: `/etc/init.d/firewall restart`.

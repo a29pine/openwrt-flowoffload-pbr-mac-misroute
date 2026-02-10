@@ -1,8 +1,12 @@
 # Build / runtime artifacts
 reproducer/output/
+dist/
 *.pcap
 *.log
 *.pid
+*.tar.gz
+*.sha256
+*.ipk
 
 # Python caches
 __pycache__/
