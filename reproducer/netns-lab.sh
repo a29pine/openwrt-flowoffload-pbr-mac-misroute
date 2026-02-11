@@ -13,7 +13,7 @@ DNS_QUERIES=${DNS_QUERIES:-4}
 ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 LOG_DIR=${LOG_DIR:-"${ROOT_DIR}/reproducer/output"}
 CLEAN_LOGS=${CLEAN_LOGS:-0}
-TCPDUMP_TIMEOUT=${TCPDUMP_TIMEOUT:-180}
+TCPDUMP_TIMEOUT=${TCPDUMP_TIMEOUT:-45}
 
 NS_C=ns_client
 NS_R=ns_router
