@@ -235,19 +235,28 @@ capture_mac_checks() {
   fi
   local pcap="${LOG_DIR}/lan-capture.pcap"
   local txt="${LOG_DIR}/lan-capture.log"
-  timeout --foreground --kill-after=10 "${TCPDUMP_TIMEOUT}" \
-    ip netns exec "${NS_R}" tcpdump -nn -e -i "${VETH_R_C}" udp port ${DNS_PORT} and dst host ${CLIENT_IP} -c ${DNS_QUERIES} -w "${pcap}" >"${txt}" 2>&1 &
-  local tcpdump_pid=$!
+  local run_capture_once
+  run_capture_once() {
+    timeout --foreground --kill-after=10 "${TCPDUMP_TIMEOUT}" \
+      ip netns exec "${NS_R}" tcpdump -nn -e -i "${VETH_R_C}" udp port ${DNS_PORT} and dst host ${CLIENT_IP} -c ${DNS_QUERIES} -w "${pcap}" >"${txt}" 2>&1 &
+    local tcpdump_pid=$!
+    generate_traffic
+    wait "${tcpdump_pid}" || true
+    ip netns exec "${NS_R}" tcpdump -nn -e -r "${pcap}" >"${txt}" 2>/dev/null || true
+  }
 
-  generate_traffic
-  wait "${tcpdump_pid}" || true
-
-  ip netns exec "${NS_R}" tcpdump -nn -e -r "${pcap}" >"${txt}" 2>/dev/null || true
+  run_capture_once
 
   local expected_mac
   expected_mac=$(ip netns exec "${NS_C}" cat /sys/class/net/"${VETH_C}"/address)
   local observed_mac
   observed_mac=$(awk '/ethertype IPv4/ {gsub(",", "", $4); print $4}' "${txt}" | sort -u)
+
+  if [ -z "${observed_mac}" ]; then
+    log "no packets captured; retrying capture"
+    run_capture_once
+    observed_mac=$(awk '/ethertype IPv4/ {gsub(",", "", $4); print $4}' "${txt}" | sort -u)
+  fi
 
   log "expected client MAC: ${expected_mac}"
   log "observed destination MACs on LAN egress: ${observed_mac:-none}"
