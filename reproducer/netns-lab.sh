@@ -150,7 +150,7 @@ stop_dns_server() {
 install_nft_rules() {
   local ft_block=""
   if [[ "${FLOW_OFFLOAD}" == "1" ]]; then
-    ft_block="flow add @ft"
+    ft_block="flow add @ftoffload"
   fi
 
   local mitigation_skip=""

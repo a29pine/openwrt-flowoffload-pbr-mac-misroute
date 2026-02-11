@@ -14,7 +14,7 @@ run_case() {
   local name="$1"; shift
   echo "[smoke] running case: ${name}" >&2
   timeout --foreground --kill-after=30 "${SMOKE_TIMEOUT}" \
-    env CLEAN_LOGS=0 LOG_DIR="${LOG_DIR}" "$LAB" run "$@" | tee "${LOG_DIR}/smoke-${name}.log"
+    env CLEAN_LOGS=0 LOG_DIR="${LOG_DIR}" "$@" "$LAB" run | tee "${LOG_DIR}/smoke-${name}.log"
   if grep -q "MAC delivery MISMATCH" "${LOG_DIR}/smoke-${name}.log"; then
     echo "[smoke] FAIL: MAC mismatch detected in ${name}" >&2
     exit 1
